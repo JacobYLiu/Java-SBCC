@@ -8,20 +8,23 @@
  * 
  * @author Jacob Liu
  */
-package edu.sbcc.cs105;
+import java.util.Scanner;
 
-public class Main {
+public class AtmPin {
 	public enum PinValidationResult {
 	    UNLOCKED_PIN_CORRECT,
 	    UNLOCKED_PIN_INCORRECT,
 	    LOCKED
-	}
+	};
 	public static PinValidationResult validatePin(String pin, int incorrectCount) {
-		
-	}
+		int code = Integer.parseInt(pin.substring(0, pin.length()-1));
+		int length = pin.length();
+		return "Code unlocked";
+	};
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
+		System.out.print("Enter your pin code: "); // asking the user for the integer
+		Scanner in = new Scanner(System.in); //scanning the input
+		String pin = in.nextLine();
+	};
 
 }
