@@ -1,0 +1,109 @@
+package xmlvalidator;
+
+import java.util.regex.*;
+
+public class BasicXmlValidator implements XmlValidator {
+	String temp = "";
+	BasicStringStack stack = new BasicStringStack();
+	BasicStringStack lineStack = new BasicStringStack();
+	String newLineSearch;
+	int newLineNumber;
+
+	@Override
+	public String[] validate(String xmlDocument) {
+		System.out.println(xmlDocument);
+		String ret[] = new String[5];
+		////// TODO Auto-generated method stub \\\\\\
+		// Build a regular expression pattern
+		String expr = "<[^!?<>]+>";
+		Pattern p = Pattern.compile(expr);
+		// Get a matcher to process our XML string
+		Matcher m = p.matcher(xmlDocument);
+
+		// Find all of the matches for expr in text
+		while (m.find()) {
+
+			// code graveyard
+
+			// /* reading the line up until it reaches the '>' or a space */
+			// for (int x = 0; x < m.group().length(); x++) {
+			// if (m.group().charAt(x) == ' ' || m.group().charAt(x) == '>') {
+			// /* gets the current character for stripping */
+			// if (m.group().charAt(1) == '/') {
+			// /* strips everything but tag name for closing tags */
+			// temp = m.group().substring(2, x);
+			// /*
+			// * ensures that when it pops its matches the top item of
+			// * the stack
+			// */
+			// if (stack.peek(stack.getCount() - 1) == temp)
+			// stack.pop();
+			// else {
+			// }
+			// // out.print("SOMETHING IS WRONG");
+			// } else { // strips everything but tag name for opening tags
+			// temp = m.group().substring(1, x);
+			// stack.push(temp);
+			// }
+			// }
+			// }
+
+			temp = m.group().replace("<", "");
+			if (temp.contains(" "))
+				temp = temp.substring(0, temp.indexOf(" "));
+			else
+				temp = temp.substring(0, temp.indexOf(">"));
+			if (temp.charAt(0) == '/') {
+				temp = temp.replace("/", "");
+				// out.println("\n" + temp + " vs " + stack.peek(0) + "\n");
+				if (stack.getCount() != 0 && stack.peek(0).equals(temp)) {
+					stack.pop();
+					lineStack.pop();
+				} else {
+					// case 1
+					// mismatch
+					if (stack.getCount() != 0) {
+						newLineSearch = xmlDocument.substring(0, m.start());
+						newLineNumber = newLineSearch.split("\n").length + 1;
+						ret[0] = "Tag mismatch";
+						ret[1] = stack.peek(0);
+						ret[2] = lineStack.peek(0);
+						ret[3] = temp;
+						ret[4] = newLineNumber + "";
+					} else {
+						newLineSearch = xmlDocument.substring(0, m.start());
+						newLineNumber = newLineSearch.split("\n").length + 1;
+						ret[0] = "Orphan closing tag";
+						ret[1] = temp;
+						ret[2] = newLineNumber + "";
+					}
+
+					// case 2
+					// orphan
+					// no opening
+
+					return ret;
+				}
+				// out.println("FOUND IT @ " + m.start());
+			} else {
+				newLineSearch = xmlDocument.substring(0, m.start());
+				newLineNumber = newLineSearch.split("\n").length + 1;
+				stack.push(temp);
+				lineStack.push(newLineNumber + "");
+			}
+			// out.println(temp + " located at " + m.start());
+			// m.start gets character position, need to get actual line #
+		}
+		if (stack.getCount() == 0)
+			return null;
+
+		ret[0] = "Unclosed tag at end";
+		ret[1] = stack.peek(0);
+		ret[2] = lineStack.peek(0);
+		return ret;
+
+		// unclosed
+
+	}
+
+}
